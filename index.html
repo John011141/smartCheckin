@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Check-In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .page-title, .greeting {
+            color: #4a4a4a;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .input-group input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .button, .check-in-btn {
+            width: 100%;
+            background-color: #00c6d7;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover, .check-in-btn:hover {
+            background-color: #0099a6;
+        }
+        .switch-page-btn {
+            background: none;
+            border: none;
+            color: #00a8ff;
+            text-decoration: underline;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        /* Page-specific styles */
+        .register-page, .login-page, .checkin-page, .history-page {
+            display: none;
+        }
+        .date-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e6f7ff;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .date-text {
+            color: #4a4a4a;
+            font-size: 16px;
+        }
+        .update-btn {
+            background-color: #00a8ff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .location-section {
+            background-color: #f7f7f7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .location-text {
+            color: #777;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .coordinates {
+            color: #333;
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+        .time-display {
+            text-align: center;
+            color: #00c6d7;
+            font-size: 40px;
+            font-weight: 700;
+            margin: 30px 0;
+        }
+        .check-in-btn:disabled {
+            background-color: #b0e0e6;
+            cursor: not-allowed;
+        }
+        .history-section {
+            margin-top: 20px;
+        }
+        .history-list {
+            list-style: none;
+            padding: 0;
+        }
+        .history-item {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="login-page" class="login-page">
+            <div class="header">
+                <h1 class="page-title">เข้าสู่ระบบ</h1>
+            </div>
+            <div class="form-section">
+                <div class="input-group">
+                    <label for="login-username">ชื่อผู้ใช้</label>
+                    <input type="text" id="login-username" placeholder="ป้อนชื่อผู้ใช้">
+                </div>
+                <div class="input-group">
+                    <label for="login-password">รหัสผ่าน</label>
+                    <input type="password" id="login-password" placeholder="ป้อนรหัสผ่าน">
+                </div>
+                <button class="button" onclick="handleLogin()">เข้าสู่ระบบ</button>
+            </div>
+            <button class="switch-page-btn" onclick="switchPage('register-page')">ยังไม่มีบัญชี? ไปหน้าลงทะเบียน</button>
+        </div>
+
+        <div id="register-page" class="register-page">
+            <div class="header">
+                <h1 class="page-title">ลงทะเบียนผู้ใช้งาน</h1>
+            </div>
+            <div class="form-section">
+                <div class="input-group">
+                    <label for="reg-name">ชื่อ-นามสกุล</label>
+                    <input type="text" id="reg-name" placeholder="ป้อนชื่อ-นามสกุล">
+                </div>
+                <div class="input-group">
+                    <label for="reg-username">ชื่อผู้ใช้</label>
+                    <input type="text" id="reg-username" placeholder="ป้อนชื่อผู้ใช้">
+                </div>
+                <div class="input-group">
+                    <label for="reg-password">รหัสผ่าน</label>
+                    <input type="password" id="reg-password" placeholder="ป้อนรหัสผ่าน">
+                </div>
+                <button class="button" onclick="handleRegister()">ลงทะเบียน</button>
+            </div>
+            <button class="switch-page-btn" onclick="switchPage('login-page')">มีบัญชีอยู่แล้ว? ไปหน้าเข้าสู่ระบบ</button>
+        </div>
+
+        <div id="checkin-page" class="checkin-page">
+            <div class="header">
+                <h1 class="greeting" id="user-greeting">สวัสดี!</h1>
+            </div>
+
+            <div class="date-section">
+                <span class="date-text" id="current-date">วันที่ กำลังโหลด...</span>
+                <button class="update-btn" onclick="getLocation()">อัพเดทตำแหน่งที่อยู่</button>
+            </div>
+
+            <div class="location-section">
+                <p class="location-text">[TH] ที่อยู่ของคุณจะแสดงที่นี่</p>
+                <p class="coordinates">ตำแหน่งปัจจุบัน: <span id="coordinates-display">กำลังหาตำแหน่ง...</span></p>
+            </div>
+
+            <div class="time-display" id="time-display">00:00:00</div>
+
+            <button class="check-in-btn" id="checkin-btn" onclick="handleCheckIn()">เช็คอิน</button>
+            <button class="check-in-btn" id="checkout-btn" style="background-color: #f44336; margin-top: 10px; display: none;" onclick="handleCheckOut()">เช็คเอาท์</button>
+            
+            <button class="switch-page-btn" onclick="switchPage('history-page')">ประวัติการเช็คอิน</button>
+            <button class="switch-page-btn" onclick="logout()">ออกจากระบบ</button>
+        </div>
+
+        <div id="history-page" class="history-page">
+            <div class="header">
+                <h1 class="page-title">ประวัติการเช็คอิน</h1>
+            </div>
+            <div class="history-section">
+                <ul class="history-list" id="history-list"></ul>
+            </div>
+            <button class="switch-page-btn" onclick="switchPage('checkin-page')">กลับไปหน้าเช็คอิน</button>
+        </div>
+    </div>
+
+    <script>
+        let userDatabase = [];
+        let currentUser = null;
+        
+        const appScriptUrl = 'https://script.google.com/macros/s/AKfycbxz7h8OlHTpxVg6DcV2Z82L96LmYApY8N7r9xnb6TFty7a5Vtk9jca8xKhqwjjcWaS4fw/exec';
+
+        window.switchPage = (pageId) => {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('register-page').style.display = 'none';
+            document.getElementById('checkin-page').style.display = 'none';
+            document.getElementById('history-page').style.display = 'none';
+            document.getElementById(pageId).style.display = 'block';
+
+            if (pageId === 'checkin-page') {
+                initializeCheckInPage();
+            } else if (pageId === 'history-page') {
+                renderHistory();
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            switchPage('login-page');
+        });
+
+        window.handleRegister = () => {
+            const name = document.getElementById('reg-name').value;
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+
+            if (name && username && password) {
+                const userExists = userDatabase.find(user => user.username === username);
+                if (userExists) {
+                    alert('ชื่อผู้ใช้ซ้ำ กรุณาเลือกชื่อผู้ใช้ใหม่');
+                    return;
+                }
+
+                userDatabase.push({ name, username, password, lastAction: null, history: [] }); 
+                alert('ลงทะเบียนสำเร็จ! ตอนนี้คุณสามารถเข้าสู่ระบบได้');
+                switchPage('login-page');
+            } else {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            }
+        };
+
+        window.handleLogin = () => {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            const user = userDatabase.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                currentUser = user; 
+                document.getElementById('user-greeting').textContent = `สวัสดี! ${currentUser.name}`;
+                alert(`ยินดีต้อนรับ ${currentUser.name}!`);
+                
+                if (currentUser.lastAction === 'เช็คอิน') {
+                    checkinBtn.style.display = 'none';
+                    checkoutBtn.style.display = 'block';
+                } else {
+                    checkinBtn.style.display = 'block';
+                    checkoutBtn.style.display = 'none';
+                }
+
+                switchPage('checkin-page'); 
+            } else {
+                alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+            }
+        };
+
+        window.logout = () => {
+            currentUser = null;
+            alert('คุณออกจากระบบแล้ว');
+            switchPage('login-page');
+        };
+
+        const timeDisplay = document.getElementById('time-display');
+        const currentDateDisplay = document.getElementById('current-date');
+        const coordinatesDisplay = document.getElementById('coordinates-display');
+        const checkinBtn = document.getElementById('checkin-btn');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const historyList = document.getElementById('history-list');
+
+        function updateTime() {
+            const now = new Date();
+            const options = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+            currentDateDisplay.textContent = `วันที่ ${now.toLocaleDateString('th-TH', options)}`;
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        window.getLocation = () => {
+            if (navigator.geolocation) {
+                coordinatesDisplay.textContent = 'กำลังดึงตำแหน่ง...';
+                checkinBtn.disabled = true;
+                checkoutBtn.disabled = true;
+
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        coordinatesDisplay.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                        checkinBtn.disabled = false;
+                        checkoutBtn.disabled = false;
+                    },
+                    (error) => {
+                        coordinatesDisplay.textContent = 'ไม่สามารถดึงตำแหน่งได้';
+                        console.error("Error getting location: ", error);
+                        checkinBtn.disabled = true;
+                        checkoutBtn.disabled = true;
+                    },
+                    options
+                );
+            } else {
+                coordinatesDisplay.textContent = 'เบราว์เซอร์ไม่รองรับ Geolocation';
+                checkinBtn.disabled = true;
+                checkoutBtn.disabled = true;
+            }
+        };
+
+        async function sendDataToSheet(action, coords) {
+            if (!currentUser || !appScriptUrl) {
+                console.error("User not logged in or App Script URL not configured.");
+                return;
+            }
+
+            const data = {
+                name: currentUser.name,
+                action: action,
+                coords: coords
+            };
+
+            try {
+                const response = await fetch(appScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                console.log(`Data for ${action} sent to Google Sheet.`);
+            } catch (error) {
+                console.error(`Failed to send data to Google Sheet for ${action}:`, error);
+            }
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = '';
+            if (currentUser && currentUser.history) {
+                currentUser.history.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'history-item';
+                    li.textContent = `${item.date} ${item.time} - สถานะ: ${item.action}, พิกัด: ${item.coords}`;
+                    historyList.appendChild(li);
+                });
+            }
+        }
+
+        window.initializeCheckInPage = () => {
+            setInterval(updateTime, 1000);
+            updateTime();
+            getLocation(); 
+        };
+
+        window.handleCheckIn = () => {
+            if (!currentUser) {
+                alert('กรุณาเข้าสู่ระบบก่อน');
+                return;
+            }
+            const now = new Date();
+            const coords = coordinatesDisplay.textContent;
+            const date = now.toLocaleDateString('th-TH');
+            const time = now.toLocaleTimeString('th-TH');
+
+            const newEntry = { action: 'เช็คอิน', date, time, coords };
+            currentUser.history.push(newEntry);
+            currentUser.lastAction = 'เช็คอิน';
+            alert('เช็คอินสำเร็จ!');
+            
+            sendDataToSheet('เช็คอิน', coords);
+
+            checkinBtn.style.display = 'none';
+            checkoutBtn.style.display = 'block';
+        };
+
+        window.handleCheckOut = () => {
+            if (!currentUser) {
+                alert('กรุณาเข้าสู่ระบบก่อน');
+                return;
+            }
+            const now = new Date();
+            const coords = coordinatesDisplay.textContent;
+            const date = now.toLocaleDateString('th-TH');
+            const time = now.toLocaleTimeString('th-TH');
+
+            const newEntry = { action: 'เช็คเอาท์', date, time, coords };
+            currentUser.history.push(newEntry);
+            currentUser.lastAction = 'เช็คเอาท์';
+            alert('เช็คเอาท์สำเร็จ!');
+            
+            sendDataToSheet('เช็คเอาท์', coords);
+
+            checkinBtn.style.display = 'block';
+            checkoutBtn.style.display = 'none';
+        };
+    </script>
+</body>
+</html>
